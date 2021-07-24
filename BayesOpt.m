@@ -13,7 +13,7 @@ optimVars = [optimizableVariable('NumHL', [1 3],'Type','integer')
              optimizableVariable('TrainFcn0', {'trainlm' 'trainbr' 'trainbfg' 'traincgb' 'traincgf' 'traingd' 'traingda' 'traingdm' 'traingdx' 'trainoss' 'trainrp' 'trainscg' 'trainb' 'trains'},'Type','categorical')               
              optimizableVariable('nEpochs',[50 2000],'Type','integer')
              optimizableVariable('InitialLearnRate',[1e-2 1],'Transform','log')
-             optimizableVariable('Momentum',[0.5 0.98])
+             optimizableVariable('Momentum',[0.8 0.98])
              optimizableVariable('TrainFcn1',{'logsig' 'tansig' 'satlins' ...
              'purelin' 'poslin' 'satlin' 'compet' 'elliotsig' 'hardlim'...
              'hardlims' 'netinv' 'radbas' 'radbasn' 'softmax' 'tribas'},'Type','categorical')
@@ -22,7 +22,8 @@ optimVars = [optimizableVariable('NumHL', [1 3],'Type','integer')
              'hardlims' 'netinv' 'radbas' 'radbasn' 'softmax' 'tribas'},'Type','categorical')]
              optimizableVariable('TrainFcn3',{'logsig' 'tansig' 'satlins' ...
              'purelin' 'poslin' 'satlin' 'compet' 'elliotsig' 'hardlim'...
-             'hardlims' 'netinv' 'radbas' 'radbasn' 'softmax' 'tribas'},'Type','categorical')];
+             'hardlims' 'netinv' 'radbas' 'radbasn' 'softmax' 'tribas'},'Type','categorical')
+             optimizableVariable('L2Regularization',[1e-10 1e-2],'Transform','log')];
         
 %Bayesion Optimization
 
@@ -34,12 +35,22 @@ BayesObject = bayesopt(ObjFcn,optimVars,...
     'IsObjectiveDeterministic',false,...
     'UseParallel',false);
 
-function ObjFcn = makeObjFcn(XTrain,YTrain)
+function ObjFcn = makeObjFcn(XTrain,YTrain,XValidation,YValidation)
     ObjFcn = @valPerfFind;
       function valPerf = valPerfFind(optVars)
+          miniBatchSize = 128;
+          validationFrequency = floor(numel(YTrain)/miniBatchSize)
           options = trainingOptions('sgdm', ...
-                    'InitialLearnRate', optVars.InitialLearnRate, ...,
-                    
+                    'InitialLearnRate', optVars.InitialLearnRate, ...
+                     'Momentum', optVars.Momentum, ...
+                     'MaxEpochs', optVars.nEpochs, ... 
+                     'L2Regularization',optVars.L2Regularization, ...
+                     'LearnRateSchedule','piecewise', ...
+                     'Plots','training-progress', ... 
+                      'Shuffle','every-epoch', ...
+                     'ValidationData',{XValidation,YValidation}, ...
+                     'ValidationFrequency',validationFrequency), ...
+                     
                     
           
           %Training Function 
@@ -52,6 +63,14 @@ function ObjFcn = makeObjFcn(XTrain,YTrain)
           Momentum = optVars.Momentum;
           TrainFcn1 = char(optVars.TrainFcn1);
           TrainFcn2 = char(optVars.TrainFcn2);
+          layers = [featureInputLayer
+                    layer1
+                    layer2
+                    layer3
+                    softmaxLayer
+                    classificationLayer]
+              
+         
           if optVars.NumHL == 2 
             hiddenLayerSizes = [layer1_size layer2_size];
           else 
