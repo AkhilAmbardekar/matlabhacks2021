@@ -1,5 +1,6 @@
 clear
 clc
+close all
 
 % read all data
 allData = readtable("crashes_small.xlsx");
@@ -81,7 +82,7 @@ net.divideParam.testRatio = 15/100;
 % net.performParam.normalization = 'standard';  
 % net.trainParam.epochs = 5;
 
-[net,~] = train(net,XTrain',YTrain'); % training the network          
+[net, ~]= train(net,XTrain',YTrain'); % training the network          
           
 YPredict = net(XTest');
 errors = gsubtract(YTest,YPredict);
