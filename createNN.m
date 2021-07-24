@@ -13,7 +13,9 @@ windSpeed = allData.Wind_Speed_mph_';
 crossing = allData.Crossing';
 crossing = double(crossing);
 mStop = allData.Stop';
+mStop = double(mStop);
 trafficSignal = allData.Traffic_Signal';
+trafficSignal = double(trafficSignal);
 
 % ordinal encoding for weather
 weatherCond = allData.Weather_Condition';
@@ -25,7 +27,9 @@ dayNight = categorical(dayNight);
 dayNightOrd = grp2idx(dayNight)';
 dayNightOrd = dayNightOrd - ones(1, 50000);
 
-inputs = [mDistance; temperature; humidity; visibility; windSpeed; ...
-    crossing; mStop; trafficSignal; weatherCondOrd; dayNightOrd];
+Predictors = [mDistance; temperature; humidity; visibility; windSpeed; ...
+    crossing; mStop; trafficSignal; weatherCondOrd; dayNightOrd]';
     
-outputs = [severity];
+Response = categorical(severity);
+
+netData = table(Predictors, Response);
