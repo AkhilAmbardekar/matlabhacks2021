@@ -1,6 +1,3 @@
-clear
-clc
-
 % read all data
 allData = readtable("crashes_small.xlsx");
 
@@ -67,11 +64,11 @@ YValid = Response(valInd, :);
 XTest = Predictors(testInd, :);
 YTest = Response(testInd, :);
 
-layers = [featureInputLayer(numFeatures, "Normalization", 'zscore')... % input layer
+layers = [featureInputLayer(numFeatures)... % input layer
     fullyConnectedLayer(10)... % dense hidden layer
-    reluLayer... % activation function
+    % softmaxLayer... % activation function
     fullyConnectedLayer(4)... % classification with 4 classes
-        softmaxLayer... % must be fixed to softmax
+    softmaxLayer... % must be fixed to softmax
             classificationLayer]; % output layer
         
 options = trainingOptions("adam", ...
