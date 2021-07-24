@@ -45,3 +45,5 @@ Predictors = [duration; temperature; humidity; visibility; windSpeed; ...
 Response = categorical(severity);
 
 netData = table(Predictors, Response);
+
+
