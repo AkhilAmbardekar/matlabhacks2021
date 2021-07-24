@@ -5,7 +5,12 @@ allData = readtable("crashes_small.xlsx");
 severity = allData.Severity;
 
 % extract inputs
-mDistance = allData.Distance_mi_';
+startTime = allData.Start_Time;
+endTime = allData.End_Time;
+duration = endTime - startTime;
+duration = duration';
+duration = datenum(duration);
+
 temperature = allData.Temperature_F_';
 humidity = allData.Humidity___';
 visibility = allData.Visibility_mi_';
@@ -27,7 +32,7 @@ dayNight = categorical(dayNight);
 dayNightOrd = grp2idx(dayNight)';
 dayNightOrd = dayNightOrd - ones(1, 50000);
 
-Predictors = [mDistance; temperature; humidity; visibility; windSpeed; ...
+Predictors = [duration; temperature; humidity; visibility; windSpeed; ...
     crossing; mStop; trafficSignal; weatherCondOrd; dayNightOrd]';
     
 Response = categorical(severity);
