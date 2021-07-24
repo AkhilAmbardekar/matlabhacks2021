@@ -1,5 +1,6 @@
 clear
 clc
+close all
 
 % read all data
 allData = readtable("crashes_small.xlsx");
