@@ -43,10 +43,11 @@ dayNightOrd = dayNightOrd - ones(1, 50000);
 % dayNightOrd = normalize(dayNightOrd);
 
 % Predictors = [duration; temperature; humidity; visibility; windSpeed; ...
-%     crossing; mStop; trafficSignal; weatherCondOrd; dayNightOrd]';
+%      crossing; mStop; trafficSignal; weatherCondOrd; dayNightOrd]';
+ 
+Predictors = [duration; ...
+    crossing; mStop; trafficSignal; weatherCondOrd; dayNightOrd]';
 
-Predictors = [duration]';
-    
 Response = categorical(severity);
 
 % netData = table(Predictors, Response);
@@ -69,23 +70,43 @@ YValid = Response(valInd, :);
 XTest = Predictors(testInd, :);
 YTest = Response(testInd, :);
 
-layers = [featureInputLayer(numFeatures, "Normalization", "none")... % input layer
-    fullyConnectedLayer(6)... % dense hidden layer
-        reluLayer... % 
-    fullyConnectedLayer(4)... % classification with 4 classes
-        softmaxLayer... % must be fixed to softmax
-            classificationLayer]; % output layer
-        
-options = trainingOptions("adam", ...
-    "MaxEpochs",1,...
-    "InitialLearnRate",1e-2,...
-    "Verbose",false,...
-    "ValidationData",{XValid,YValid},...
-    "Plots","training-progress");
-        
-net = trainNetwork(XTrain, YTrain, layers, options);
+net = patternnet(10);
 
-YPredict = classify(net, XTest);
+net.divideParam.trainRatio = 70/100; % 75|25 split between training and testing
+net.divideParam.valRatio = 15/100;
+net.divideParam.testRatio = 15/100;
 
-testError = perform(net, double(YTest), double(YPredict));
+% net.layers{1}.transferFcn = 'logsig';  % Hidden layer 1
+% net.performFcn = 'mse'; % mean squared error
+% net.performParam.normalization = 'standard';  
+% net.trainParam.epochs = 5;
+
+[net,~] = train(net,XTrain',YTrain'); % training the network          
+          
+YPredict = net(XTest');
+errors = gsubtract(YTest,YPredict);
+performance = perform(net,YTest,YPredict)
+% 
+% layers = [featureInputLayer(numFeatures, "Normalization", "none")... % input layer
+%     fullyConnectedLayer(6)... % dense hidden layer
+%         reluLayer... % 
+%     fullyConnectedLayer(4)... % classification with 4 classes
+%         softmaxLayer... % must be fixed to softmax
+%             classificationLayer]; % output layer
+%         
+% options = trainingOptions("sgdm", ...
+%     "MaxEpochs",1,...
+%     "InitialLearnRate",1e-2,...
+%     "Verbose",false,...
+%     "Momentum",0.9,...
+%     "L2Regularization",0.1,...
+%     "ValidationData",{XValid,YValid},...
+%     "Plots","training-progress");
+%         
+% net = trainNetwork(XTrain, YTrain, layers, options);
+% 
+% YPredict = classify(net, XTest);
+% unique(YPredict)
+% 
+% testError = perform(net, double(YTest), double(YPredict));
 
