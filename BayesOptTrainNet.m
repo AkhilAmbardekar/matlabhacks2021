@@ -63,29 +63,25 @@ YTest = Response(testInd, :);
 
 %Setting up hyperparameters that need to be optimized 
 
-minHiddenLayerSize = 4;
-maxHiddenLayerSize = 30;
+minHiddenLayerSize = 1;
+maxHiddenLayerSize = 50;
 hiddenLayerSizeRange = [minHiddenLayerSize maxHiddenLayerSize];
 optimVars = [optimizableVariable('NumHL', [1 3],'Type','integer') 
              optimizableVariable('Layer1Size',hiddenLayerSizeRange,'Type','integer') 
              optimizableVariable('Layer2Size',hiddenLayerSizeRange,'Type','integer') 
              optimizableVariable('Layer3Size', hiddenLayerSizeRange, 'Type','integer') 
-             optimizableVariable('layer1',{'reluLayer' 'leakyReluLayer' ...
-             'clippedReluLayer','eluLayer', 'tanhLayer','swishLayer'},'Type','categorical' )
-             optimizableVariable('layer2',{'reluLayer' 'leakyReluLayer' ...
-             'clippedReluLayer','eluLayer', 'tanhLayer','swishLayer'},'Type','categorical')
-             optimizableVariable('layer3',{'reluLayer' 'leakyReluLayer' ...
-             'clippedReluLayer','eluLayer', 'tanhLayer','swishLayer'},'Type','categorical')];
+             optimizableVariable("layer1",{'reluLayer' 'leakyReluLayer' ...
+             'clippedReluLayer' 'eluLayer' 'tanhLayer' 'swishLayer'},"Type","categorical")];
         
 %Bayesion Optimization
 
-ObjFcn = makeObjFcn(XTrain, YTrain, XValid, YValid);
+ObjFcn = makeObjFcn(XTrain, YTrain, XValid, YValid,XTest,YTest);
 
 BayesObject = bayesopt(ObjFcn,optimVars,...
-    'MaxObj',300,...
-    'MaxTime',1*60*60,...
-    'IsObjectiveDeterministic',true,...
-    'UseParallel',false);
+    "MaxObj",300,...
+    "MaxTime",1*60*60,...
+    "IsObjectiveDeterministic",true,...
+    "UseParallel",false);
 
 
 %Evaluate Final Network
@@ -95,42 +91,53 @@ savedStruct = load(fileName);
 valError = savedStruct.valError
 
 
-function ObjFcn = makeObjFcn(XTrain,YTrain,XValidation,YValidation)
+function ObjFcn = makeObjFcn(XTrain,YTrain,XValidation,YValidation,XTest,YTest)
     ObjFcn = @valErrorFun;
       function testError = valErrorFun(optVars)
-          options = trainingOptions('sgdm', ...
-                    'InitialLearnRate', 0.01, ...
-                     'Momentum', 0.9, ...
-                     'MaxEpochs', 50, ... 
-                     'L2Regularization',0.01, ...
-                     'Plots','training-progress', ... 
-                     'Shuffle','every-epoch', ...
-                     'ValidationData',{XValidation,YValidation});
+          options = trainingOptions("sgdm", ...
+                    "InitialLearnRate", 0.01, ...
+                     "Momentum", 0.9, ...
+                     "MaxEpochs", 50, ... 
+                     "L2Regularization",0.01, ...
+                     "Plots","training-progress", ... 
+                     "Shuffle","every-epoch", ...
+                     "ValidationData",{XValidation,YValidation});
+                 
+          
+%           activFunStr = ["reluLayer", "leakyReluLayer", ...
+%              "clippedReluLayer","eluLayer", "tanhLayer","swishLayer"];
+%          
+%          idx1 = find(strcmp(activFunStr,convertCharsToStrings(char(optVars.layer1))));
+         
+%          activFun = [reluLayer, leakyReluLayer, ...
+%              clippedReluLayer, eluLayer, tanhLayer,swishLayer];
+         
+         optVars.NumHL = 1;
                      
           if optVars.NumHL == 3
-              layers = [featureInputLayer(numFeatures, "Normalization", "none")... % input layer
+              layers = [featureInputLayer(6, "Normalization", "none")... % input layer
                         fullyConnectedLayer(optVars.Layer1Size)... % dense hidden layer
-                        optVars.layer1... % 
-                        fullyConnectedLayer(optVars.Layer2Size)
-                        optVars.layer2
-                        fullyConnectedLayer(optVars.Layer3Size)
-                        optVars.layer3
+                        char(optVars.layer1)... % 
+                        fullyConnectedLayer(optVars.Layer2Size)...
+                        char(optVars.layer2)...
+                        fullyConnectedLayer(optVars.Layer3Size)...
+                        char(optVars.layer3)...
                         fullyConnectedLayer(4)... % classification with 4 classes
                         softmaxLayer... % must be fixed to softmax
                         classificationLayer]; % output layer
           elseif optVars.NumHL == 2
-              layers = [featureInputLayer(numFeatures, "Normalization", "none")... % input layer
+              layers = [featureInputLayer(6, "Normalization", "none")... % input layer
                         fullyConnectedLayer(optVars.Layer1Size)... % dense hidden layer
-                        optVars.layer1... % 
-                        fullyConnectedLayer(optVars.Layer2Size)
-                        optVars.layer2
+                        char(optVars.layer1)... % 
+                        fullyConnectedLayer(optVars.Layer2Size)...
+                        char(optVars.layer2)...
                         fullyConnectedLayer(4)... % classification with 4 classes
                         softmaxLayer... % must be fixed to softmax
                         classificationLayer]; % output layer
           else
-              layers = [featureInputLayer(numFeatures, "Normalization", "none")... % input layer
+              layers = [featureInputLayer(6, "Normalization", "none")... % input layer
                         fullyConnectedLayer(optVars.Layer1Size)... % dense hidden layer
-                        optVars.layer1... % 
+                        str2sym(char(optVars.layer1)) ... % 
                         fullyConnectedLayer(4)... % classification with 4 classes
                         softmaxLayer... % must be fixed to softmax
                         classificationLayer]; % output layer
