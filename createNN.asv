@@ -1,3 +1,6 @@
+clear
+clc
+
 % read all data
 allData = readtable("crashes_small.xlsx");
 
@@ -41,6 +44,9 @@ dayNightOrd = dayNightOrd - ones(1, 50000);
 
 Predictors = [duration; temperature; humidity; visibility; windSpeed; ...
     crossing; mStop; trafficSignal; weatherCondOrd; dayNightOrd]';
+
+Predictors = [duration; ...
+    crossing; mStop; trafficSignal; weatherCondOrd; dayNightOrd]';
     
 Response = categorical(severity);
 
@@ -64,11 +70,11 @@ YValid = Response(valInd, :);
 XTest = Predictors(testInd, :);
 YTest = Response(testInd, :);
 
-layers = [featureInputLayer(numFeatures)... % input layer
+layers = [featureInputLayer(numFeatures, "Normalization", "none")... % input layer
     fullyConnectedLayer(10)... % dense hidden layer
-    % softmaxLayer... % activation function
+        reluLayer... % 
     fullyConnectedLayer(4)... % classification with 4 classes
-    softmaxLayer... % must be fixed to softmax
+        softmaxLayer... % must be fixed to softmax
             classificationLayer]; % output layer
         
 options = trainingOptions("adam", ...

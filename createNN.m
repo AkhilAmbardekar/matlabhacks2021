@@ -42,8 +42,10 @@ dayNightOrd = grp2idx(dayNight)';
 dayNightOrd = dayNightOrd - ones(1, 50000);
 % dayNightOrd = normalize(dayNightOrd);
 
-Predictors = [duration; temperature; humidity; visibility; windSpeed; ...
-    crossing; mStop; trafficSignal; weatherCondOrd; dayNightOrd]';
+% Predictors = [duration; temperature; humidity; visibility; windSpeed; ...
+%     crossing; mStop; trafficSignal; weatherCondOrd; dayNightOrd]';
+
+Predictors = [duration]';
     
 Response = categorical(severity);
 
@@ -67,9 +69,9 @@ YValid = Response(valInd, :);
 XTest = Predictors(testInd, :);
 YTest = Response(testInd, :);
 
-layers = [featureInputLayer(numFeatures, "Normalization", 'zscore')... % input layer
-    fullyConnectedLayer(10)... % dense hidden layer
-    reluLayer... % activation function
+layers = [featureInputLayer(numFeatures, "Normalization", "none")... % input layer
+    fullyConnectedLayer(6)... % dense hidden layer
+        reluLayer... % 
     fullyConnectedLayer(4)... % classification with 4 classes
         softmaxLayer... % must be fixed to softmax
             classificationLayer]; % output layer
