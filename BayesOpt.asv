@@ -63,7 +63,7 @@ function ObjFcn = makeObjFcn(XTrain,YTrain,XValidation,YValidation)
           Momentum = optVars.Momentum;
           TrainFcn1 = char(optVars.TrainFcn1);
           TrainFcn2 = char(optVars.TrainFcn2);
-          layers = [featureInputLayer
+          layers = [inputLayer
                     layer1
                     layer2
                     layer3
