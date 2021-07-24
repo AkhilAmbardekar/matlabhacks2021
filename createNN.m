@@ -81,11 +81,11 @@ net.divideParam.testRatio = 15/100;
 % net.performParam.normalization = 'standard';  
 % net.trainParam.epochs = 5;
 
-[net,~] = train(net,XTrain',YTrain'); % training the network          
+[net,~] = train(net,XTrain',double(YTrain)'); % training the network          
           
 YPredict = net(XTest');
-errors = gsubtract(YTest,YPredict);
-performance = perform(net,YTest,YPredict)
+errors = gsubtract(double(YTest)',YPredict);
+performance = perform(net,double(YTest)',YPredict)
 % 
 % layers = [featureInputLayer(numFeatures, "Normalization", "none")... % input layer
 %     fullyConnectedLayer(6)... % dense hidden layer
