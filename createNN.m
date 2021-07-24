@@ -29,3 +29,7 @@ inputs = [mDistance; temperature; humidity; visibility; windSpeed; ...
     crossing; mStop; trafficSignal; weatherCondOrd; dayNightOrd];
     
 outputs = [severity];
+
+arrTable = [inputs; outputs]
+
+valTable = array2Table(arrTable)
