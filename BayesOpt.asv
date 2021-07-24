@@ -7,7 +7,7 @@ Outputs = Response;
 minHiddenLayerSize = 1;
 maxHiddenLayerSize = 20;
 hiddenLayerSizeRange = [minHiddenLayerSize maxHiddenLayerSize];
-optimVars = [optimizableVariable('NumHL', [1 3],'Type','integer')
+optimVars = [optimizableVariable('NumHL', [1 2],'Type','integer')
              optimizableVariable('Layer1Size',hiddenLayerSizeRange,'Type','integer')
              optimizableVariable('Layer2Size',hiddenLayerSizeRange,'Type','integer')
              optimizableVariable('TrainFcn0', {'trainlm' 'trainbr' 'trainbfg' 'traincgb' 'traincgf' 'traingd' 'traingda' 'traingdm' 'traingdx' 'trainoss' 'trainrp' 'trainscg' 'trainb' 'trains'},'Type','categorical')               
@@ -18,9 +18,6 @@ optimVars = [optimizableVariable('NumHL', [1 3],'Type','integer')
              'purelin' 'poslin' 'satlin' 'compet' 'elliotsig' 'hardlim'...
              'hardlims' 'netinv' 'radbas' 'radbasn' 'softmax' 'tribas'},'Type','categorical')
              optimizableVariable('TrainFcn2',{'logsig' 'tansig' 'satlins' ...
-             'purelin' 'poslin' 'satlin' 'compet' 'elliotsig' 'hardlim'...
-             'hardlims' 'netinv' 'radbas' 'radbasn' 'softmax' 'tribas'},'Type','categorical')]
-             optimizableVariable('TrainFcn3',{'logsig' 'tansig' 'satlins' ...
              'purelin' 'poslin' 'satlin' 'compet' 'elliotsig' 'hardlim'...
              'hardlims' 'netinv' 'radbas' 'radbasn' 'softmax' 'tribas'},'Type','categorical')];
         
@@ -35,13 +32,8 @@ BayesObject = bayesopt(ObjFcn,optimVars,...
     'UseParallel',false);
 
 function ObjFcn = makeObjFcn(XTrain,YTrain)
-    ObjFcn = @valPerfFind;
-      function valPerf = valPerfFind(optVars)
-          options = trainingOptions('sgdm', ...
-                    'InitialLearnRate', optVars.InitialLearnRate, ...,
-                    
-                    
-          
+    ObjFcn = @valErrorFun;
+      function valError = valErrorFomd(optVars)
           %Training Function 
           trainFcn = char(optVars.TrainFcn0);  % Bayesian Regularization backpropagation.
           % Create a Fitting Network
@@ -58,7 +50,7 @@ function ObjFcn = makeObjFcn(XTrain,YTrain)
               hiddenLayerSizes = [layer1_size];
           end
           % Specifying activation function at each layer
-          net = trainNetwork(hiddenLayerSizes,trainFcn);
+          net = fitnet(hiddenLayerSizes,trainFcn);
 
           % Setup Division of Data for Training, Validation, Testing
           net.divideParam.trainRatio = 70/100;
@@ -85,7 +77,9 @@ function ObjFcn = makeObjFcn(XTrain,YTrain)
           [net,~] = train(net,XTrain,YTrain);
           % Test the Network
           YPredicted = net(XTrain);
-          valPerf = perform(net,YTrain,YPredicted);
-         
+          valError = perform(net,YTrain,YPredicted);
+          fileName = num2str(valError) + ".mat";
+          %save(fileName,'net','valError')
+          cons = [];
       end
   end
