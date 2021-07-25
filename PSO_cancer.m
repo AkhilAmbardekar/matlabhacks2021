@@ -42,10 +42,6 @@ disp(X)
 disp(fbest)
 actFunc = {'logsig', 'tansig', 'satlins','purelin', 'poslin', 'satlin', 'compet', 'elliotsig', 'hardlim', 'hardlims', 'netinv', 'radbas', 'radbasn', 'softmax', 'tribas'}; %ub 15
 
-
-
-
-
 %% Output Function to Optimize
 function ObjFcn = makeObjFcn(XTrain,YTrain)
     ObjFcn = @valErrorFun;
