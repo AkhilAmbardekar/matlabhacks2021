@@ -10,7 +10,7 @@ s = rng;
 cancerData = readtable("cancer_reg.csv");
 
 % output
-Targets = cancerData.PctPrivateCoverageAlone';
+Targets = cancerData.TARGET_deathRate';
 
 % inputs
 Inputs = cancerData;
