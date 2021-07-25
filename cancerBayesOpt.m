@@ -7,7 +7,7 @@ rng('default');
 s = rng;
 
 % read all data
-cancerData = readtable("cancer_reg.csv");
+cancerData = readtable("cancer_reg.csv");w
 
 % output
 Targets = cancerData.TARGET_deathRate';
